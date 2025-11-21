@@ -1,2 +1,253 @@
 # index.html
-测试
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Artist Portfolio</title>
+    <style>
+        /* --- 基础样式设置 (CSS) --- */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00ffa3; /* 霓虹绿，适合3D科技感 */
+            --text-main: #ffffff;
+            --text-sec: #aaaaaa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; }
+
+        /* 头部 */
+        header { padding: 2rem 5%; display: flex; justify-content: space-between; align-items: center; background: rgba(18,18,18,0.95); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #333; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); text-decoration: none; text-transform: uppercase; letter-spacing: 2px; }
+        nav ul { list-style: none; display: flex; gap: 20px; }
+        nav a { color: var(--text-main); text-decoration: none; transition: 0.3s; font-size: 0.9rem; }
+        nav a:hover { color: var(--accent-color); }
+
+        /* 英雄区域 (Hero Section) */
+        .hero { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; background: radial-gradient(circle at center, #2a2a2a 0%, #121212 70%); }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+        .hero p { color: var(--text-sec); max-width: 600px; margin-bottom: 2rem; }
+        .btn { padding: 10px 30px; background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); text-decoration: none; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .btn:hover { background: var(--accent-color); color: #000; }
+
+        /* 筛选按钮 */
+        .filters { text-align: center; margin: 2rem 0; }
+        .filter-btn { background: none; border: none; color: var(--text-sec); margin: 0 10px; cursor: pointer; font-size: 1rem; padding-bottom: 5px; }
+        .filter-btn.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); }
+
+        /* 作品网格 */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 0 5%; max-width: 1400px; margin: 0 auto; padding-bottom: 4rem; }
+        .card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; transition: transform 0.3s ease; cursor: pointer; position: relative; group: hover; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .card-img { width: 100%; height: 250px; object-fit: cover; display: block; }
+        .card-info { padding: 15px; }
+        .card-title { font-size: 1.1rem; margin-bottom: 5px; }
+        .card-cat { font-size: 0.8rem; color: var(--accent-color); text-transform: uppercase; }
+        
+        /* 弹窗 (Modal) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .modal.open { display: flex; animation: fadeIn 0.3s; }
+        .modal-content { max-width: 90%; max-height: 80vh; object-fit: contain; box-shadow: 0 0 20px rgba(0,255,163,0.2); }
+        .modal-text { margin-top: 20px; text-align: center; max-width: 800px; }
+        .close-modal { position: absolute; top: 30px; right: 40px; color: white; font-size: 3rem; cursor: pointer; }
+
+        /* 页脚 */
+        footer { text-align: center; padding: 2rem; color: var(--text-sec); font-size: 0.8rem; border-top: 1px solid #333; margin-top: auto; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .gallery { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <header>
+        <a href="#" class="logo" id="site-title">MY PORTFOLIO</a>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="window.scrollTo(0,0)">首页</a></li>
+                <li><a href="#gallery">作品</a></li>
+                <li><a href="#contact">联系</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 个人介绍区域 -->
+    <section class="hero">
+        <h1 id="hero-title">你好，我是 [你的名字]</h1>
+        <p id="hero-desc">专注硬表面建模 / 角色设计 / 场景渲染</p>
+        <a href="#gallery" class="btn">查看作品</a>
+    </section>
+
+    <!-- 筛选与展示区域 -->
+    <div id="gallery">
+        <div class="filters" id="filter-container">
+            <!-- 筛选按钮会通过JS自动生成 -->
+        </div>
+        <div class="gallery" id="gallery-grid">
+            <!-- 作品卡片会通过JS自动生成 -->
+        </div>
+    </div>
+
+    <!-- 图片详情弹窗 -->
+    <div class="modal" id="modal">
+        <span class="close-modal">&times;</span>
+        <img src="" alt="" class="modal-content" id="modal-img">
+        <div class="modal-text">
+            <h2 id="modal-title"></h2>
+            <p id="modal-desc" style="color: #ccc; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer id="contact">
+        <p>联系邮箱: <span id="contact-email">email@example.com</span></p>
+        <p>&copy; 2025 3D Artist Portfolio. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // =================================================================
+        // ★★★ 编辑区域：在这里修改网站内容 (无需修改HTML结构) ★★★
+        // =================================================================
+        
+        const config = {
+            // 1. 网站基本信息
+            siteTitle: "LI MING | 3D ART",
+            heroTitle: "你好，我是李明",
+            heroDesc: "一名热衷于创造赛博朋克风格与次世代游戏资产的3D建模师。熟练使用 Blender, ZBrush, Maya。",
+            email: "liming@example.com",
+
+            // 2. 作品列表 (复制 {...}, 粘贴添加新作品)
+            // category: 用于筛选分类 (建议使用英文或统一的中文词汇)
+            // image: 图片链接 (可以使用图床链接，或者本地相对路径)
+            projects: [
+                {
+                    title: "赛博武士 2077",
+                    category: "角色",
+                    image: "https://images.unsplash.com/photo-1615840287214-7c63c9382e23?q=80&w=800&auto=format&fit=crop",
+                    description: "这是一个高精度的角色建模练习，使用ZBrush雕刻，Substance Painter绘制贴图。"
+                },
+                {
+                    title: "废弃空间站走廊",
+                    category: "场景",
+                    image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=800&auto=format&fit=crop",
+                    description: "使用UE5渲染的实时光照场景，专注于环境叙事和PBR材质表现。"
+                },
+                {
+                    title: "机械义肢概念",
+                    category: "硬表面",
+                    image: "https://images.unsplash.com/photo-1535378437268-1399363c86fc?q=80&w=800&auto=format&fit=crop",
+                    description: "Blender硬表面建模练习，探索机械结构与人体工学的结合。"
+                },
+                {
+                    title: "低模幻想武器",
+                    category: "道具",
+                    image: "https://images.unsplash.com/photo-1580234597812-d8a47ba54629?q=80&w=800&auto=format&fit=crop",
+                    description: "为移动端游戏设计的低面数手绘风格武器。"
+                },
+                {
+                    title: "异星植物",
+                    category: "场景",
+                    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
+                    description: "使用SpeedTree和Houdini生成的程序化植被。"
+                },
+                {
+                    title: "未来飞行器",
+                    category: "硬表面",
+                    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
+                    description: "概念设计，不仅是建模，也包含了完整的合成与后期处理。"
+                }
+            ]
+        };
+
+        // =================================================================
+        // ★★★ 下面的代码负责生成网页逻辑，一般不需要修改 ★★★
+        // =================================================================
+
+        // 1. 初始化内容
+        document.getElementById('site-title').textContent = config.siteTitle;
+        document.getElementById('hero-title').textContent = config.heroTitle;
+        document.getElementById('hero-desc').textContent = config.heroDesc;
+        document.getElementById('contact-email').textContent = config.email;
+
+        const galleryGrid = document.getElementById('gallery-grid');
+        const filterContainer = document.getElementById('filter-container');
+
+        // 2. 渲染作品列表
+        function renderProjects(filter = 'All') {
+            galleryGrid.innerHTML = '';
+            
+            config.projects.forEach(project => {
+                if (filter === 'All' || project.category === filter) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${project.image}" alt="${project.title}" class="card-img">
+                        <div class="card-info">
+                            <div class="card-cat">${project.category}</div>
+                            <h3 class="card-title">${project.title}</h3>
+                        </div>
+                    `;
+                    // 点击事件
+                    card.addEventListener('click', () => openModal(project));
+                    galleryGrid.appendChild(card);
+                }
+            });
+        }
+
+        // 3. 生成筛选按钮
+        const categories = ['All', ...new Set(config.projects.map(p => p.category))];
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = `filter-btn ${cat === 'All' ? 'active' : ''}`;
+            btn.textContent = cat === 'All' ? '全部' : cat;
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderProjects(cat);
+            });
+            filterContainer.appendChild(btn);
+        });
+
+        // 4. 弹窗逻辑
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDesc = document.getElementById('modal-desc');
+        const closeModal = document.querySelector('.close-modal');
+
+        function openModal(project) {
+            modalImg.src = project.image;
+            modalTitle.textContent = project.title;
+            modalDesc.textContent = project.description;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden'; // 禁止背景滚动
+        }
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('open');
+            document.body.style.overflow = 'auto';
+        });
+
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // 初始渲染
+        renderProjects();
+
+    </script>
+</body>
+</html>
